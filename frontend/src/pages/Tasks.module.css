@@ -2,7 +2,11 @@
   display: grid;
   gap: 18px;
 }
-
+.resultsSummary {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: -4px 0 0;
+}
 .taskGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

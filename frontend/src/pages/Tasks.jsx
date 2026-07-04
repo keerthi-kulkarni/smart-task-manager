@@ -17,23 +17,26 @@ const initialFilters = {
   search: "",
   status: "",
   priority: "",
-  category: "",
+  due: "",
   sort: "newest"
 };
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalTasks: 0 });
   const [filters, setFilters] = useState(initialFilters);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
-  const debouncedSearch = useDebounce(filters.search);
+  const debouncedSearch = useDebounce(filters.search, 400);
   const query = useMemo(
     () => ({
       ...filters,
-      search: debouncedSearch
+      search: debouncedSearch,
+      page: 1,
+      limit: 12
     }),
     [filters, debouncedSearch]
   );
@@ -44,6 +47,11 @@ const Tasks = () => {
     try {
       const data = await taskService.getTasks(query);
       setTasks(data.tasks);
+      setPagination({
+        currentPage: data.currentPage,
+        totalPages: data.totalPages,
+        totalTasks: data.totalTasks
+      });
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -60,6 +68,10 @@ const Tasks = () => {
       ...current,
       [field]: value
     }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters(initialFilters);
   };
 
   const openCreateModal = () => {
@@ -131,15 +143,19 @@ const Tasks = () => {
       <TaskToolbar
         filters={filters}
         onChange={handleFilterChange}
+        onClear={handleClearFilters}
         onCreate={openCreateModal}
         onExport={handleExport}
-        taskCount={tasks.length}
+        taskCount={pagination.totalTasks}
+        resultLabel={pagination.totalTasks === 1 ? "1 task" : `${pagination.totalTasks} tasks`}
       />
 
       {isLoading ? (
         <Spinner label="Loading tasks" />
       ) : tasks.length ? (
-        <section className={styles.taskGrid}>
+        <>
+          <p className={styles.resultsSummary}>Showing {pagination.totalTasks} task{pagination.totalTasks === 1 ? "" : "s"}</p>
+          <section className={styles.taskGrid}>
           {tasks.map((task) => (
             <TaskCard
               key={task._id}
@@ -149,11 +165,12 @@ const Tasks = () => {
               onEdit={openEditModal}
             />
           ))}
-        </section>
+          </section>
+        </>
       ) : (
         <EmptyState
-          title="No tasks found"
-          message="Create a task or adjust the current filters."
+          title="No matching tasks found"
+          message="Adjust the active filters or create a fresh task."
           action={
             <Button type="button" onClick={openCreateModal}>
               <Plus size={18} />

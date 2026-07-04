@@ -3,48 +3,8 @@ import { createActivityLog } from "../services/activityService.js";
 import { buildTasksCsv } from "../services/csvService.js";
 import AppError from "../utils/AppError.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { getSuggestedPriority, isTaskOverdue, priorityWeight } from "../utils/taskUtils.js";
-
-const buildTaskQuery = (userId, filters) => {
-  const query = { userId };
-  const { status, priority, category, search } = filters;
-
-  if (status === "Overdue") {
-    query.status = { $ne: "Completed" };
-    query.dueDate = { $lt: new Date() };
-  } else if (status) {
-    query.status = status;
-  }
-
-  if (priority) {
-    query.priority = priority;
-  }
-
-  if (category) {
-    query.category = category;
-  }
-
-  if (search) {
-    query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } }
-    ];
-  }
-
-  return query;
-};
-
-const getSortOption = (sort) => {
-  switch (sort) {
-    case "dueDate":
-      return { dueDate: 1 };
-    case "oldest":
-      return { createdAt: 1 };
-    case "newest":
-    default:
-      return { createdAt: -1 };
-  }
-};
+import { buildTaskQuery, getPaginationOptions, getTaskSortOption } from "../utils/taskQuery.js";
+import { getSuggestedPriority, isTaskOverdue } from "../utils/taskUtils.js";
 
 const findOwnedTask = async (taskId, userId) => {
   const task = await Task.findOne({ _id: taskId, userId });
@@ -57,17 +17,25 @@ const findOwnedTask = async (taskId, userId) => {
 };
 
 export const getTasks = asyncHandler(async (req, res) => {
-  const { status, priority, category, search, sort = "newest" } = req.query;
-  const query = buildTaskQuery(req.user._id, { status, priority, category, search });
-  let tasks = await Task.find(query).sort(getSortOption(sort));
+  const { status, priority, search, due, sort = "newest", page, limit } = req.query;
+  const pagination = getPaginationOptions({ page, limit });
+  const query = buildTaskQuery(req.user._id, { status, priority, search, due });
+  const sortOption = getTaskSortOption(sort);
 
-  if (sort === "priority") {
-    tasks = tasks.sort((a, b) => priorityWeight[a.priority] - priorityWeight[b.priority]);
-  }
+  const [tasks, totalTasks] = await Promise.all([
+    Task.find(query)
+      .sort(sortOption)
+      .skip((pagination.page - 1) * pagination.limit)
+      .limit(pagination.limit)
+      .lean(),
+    Task.countDocuments(query)
+  ]);
 
   res.status(200).json({
-    count: tasks.length,
-    tasks
+    tasks,
+    currentPage: pagination.page,
+    totalPages: Math.max(1, Math.ceil(totalTasks / pagination.limit)),
+    totalTasks
   });
 });
 

@@ -3,8 +3,8 @@
   gap: 18px;
   padding: 20px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--surface) 84%, var(--accent) 16%));
   box-shadow: var(--shadow);
 }
 
@@ -17,6 +17,7 @@
 
 .topRow h2 {
   font-size: 1.55rem;
+  margin: 0;
 }
 
 .eyebrow {
@@ -24,6 +25,8 @@
   font-size: 0.78rem;
   text-transform: uppercase;
   font-weight: 900;
+  letter-spacing: 0.08em;
+  margin: 0 0 4px;
 }
 
 .actions {
@@ -34,7 +37,7 @@
 
 .filters {
   display: grid;
-  grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(150px, 1fr));
+  grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(150px, 1fr));
   gap: 12px;
 }
 
