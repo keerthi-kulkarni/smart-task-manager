@@ -1,0 +1,31 @@
+.empty {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 28px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--surface-alt);
+}
+
+.empty h3 {
+  font-size: 1.1rem;
+}
+
+.empty p {
+  color: var(--muted);
+  max-width: 420px;
+}

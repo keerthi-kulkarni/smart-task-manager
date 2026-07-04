@@ -1,0 +1,61 @@
+.card {
+  min-height: 118px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.card p {
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.86rem;
+}
+
+.card strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 1.85rem;
+}
+
+.card span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.blue .icon {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.green .icon {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.amber .icon {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.red .icon {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.violet .icon {
+  color: var(--violet);
+  background: var(--violet-soft);
+}

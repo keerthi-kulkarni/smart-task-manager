@@ -1,0 +1,31 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.page h1 {
+  font-size: clamp(4rem, 16vw, 8rem);
+  color: var(--accent);
+}
+
+.page p {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.linkButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 800;
+}

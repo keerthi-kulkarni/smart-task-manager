@@ -1,0 +1,86 @@
+.card {
+  min-height: 255px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.overdue {
+  border-color: color-mix(in srgb, var(--red) 48%, var(--border));
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header h3 {
+  margin-top: 8px;
+  line-height: 1.25;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge,
+.category {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.high {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.medium {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.low {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.status,
+.category {
+  color: var(--muted);
+  background: var(--surface-alt);
+}
+
+.description {
+  color: var(--muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
