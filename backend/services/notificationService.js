@@ -22,6 +22,8 @@ const REMINDER_TYPES = {
   }
 };
 
+const OVERDUE_REMINDER_INTERVAL_MS = 60 * 60 * 1000;
+
 export const getReminderTypeForTask = (
   task,
   currentDate = new Date()
@@ -68,6 +70,9 @@ const buildReminderEmailHtml = (task, reminderType) => {
     day: "numeric",
     year: "numeric"
   });
+  const overdueWarning = reminderType === "overdue"
+    ? "<p style=\"margin:0 0 12px; color:#fda4af; font-weight:700;\">⚠️ This task is overdue and still needs attention.</p>"
+    : "";
 
   return `
     <div style="font-family: Inter, Arial, sans-serif; background:#0f172a; color:#f8fafc; padding:24px;">
@@ -79,6 +84,7 @@ const buildReminderEmailHtml = (task, reminderType) => {
         <div style="padding:24px;">
           <h3 style="margin:0 0 12px; font-size:20px; color:#fff;">${reminder.title}</h3>
           <p style="margin:0 0 16px; color:#cbd5e1;">${reminder.title} for <strong>${task.title}</strong>.</p>
+          ${overdueWarning}
           <div style="background:#181f2d; border:1px solid #273449; border-radius:12px; padding:16px; margin-bottom:16px;">
             <p style="margin:0 0 8px; color:#cbd5e1;"><strong>Task:</strong> ${task.title}</p>
             <p style="margin:0 0 8px; color:#cbd5e1;"><strong>Description:</strong> ${task.description || "No description provided"}</p>
@@ -104,11 +110,32 @@ const getReminderTrackingField = (reminderType) => {
   const mapping = {
     "due-today": "dueTodayReminderSentAt",
     "due-tomorrow": "dueTomorrowReminderSentAt",
-    overdue: "overdueReminderSentAt",
+    overdue: "lastOverdueReminderAt",
     "high-priority-due-tomorrow": "highPriorityDueTomorrowReminderSentAt"
   };
 
   return mapping[reminderType] || "lastReminderSentAt";
+};
+
+export const shouldSendOverdueReminder = (task, currentDate = new Date()) => {
+  if (!task || task.status === "Completed") {
+    return false;
+  }
+
+  const dueDate = new Date(task.dueDate);
+
+  if (!(currentDate > dueDate)) {
+    return false;
+  }
+
+  const reminderTracking = task.reminderTracking || {};
+  const lastOverdueReminderAt = reminderTracking.lastOverdueReminderAt || reminderTracking.overdueReminderSentAt;
+
+  if (!lastOverdueReminderAt) {
+    return true;
+  }
+
+  return currentDate.getTime() - new Date(lastOverdueReminderAt).getTime() >= OVERDUE_REMINDER_INTERVAL_MS;
 };
 
 export const createNotification = async ({ userId, title, message, type = "info", relatedTask = null }) => {
@@ -154,6 +181,11 @@ export const deleteNotification = async (notificationId, userId) => {
   return notification;
 };
 
+export const deleteAllNotifications = async (userId) => {
+  const result = await Notification.deleteMany({ userId });
+  return { deletedCount: result.deletedCount || 0 };
+};
+
 export const getNotifications = async ({ userId, page = 1, limit = 10, filter = "all" }) => {
   const normalizedLimit = Math.min(50, Math.max(1, Number(limit) || 10));
   const normalizedPage = Math.max(1, Number(page) || 1);
@@ -184,7 +216,6 @@ export const getUnreadCount = async (userId) => {
 };
 
 export const sendTaskReminderEmails = async (currentDate = new Date()) => {
-  // Fetch tasks due until tomorrow so tomorrow reminders work too
   const endOfTomorrow = new Date(currentDate);
   endOfTomorrow.setDate(endOfTomorrow.getDate() + 1);
   endOfTomorrow.setHours(23, 59, 59, 999);
@@ -193,14 +224,6 @@ export const sendTaskReminderEmails = async (currentDate = new Date()) => {
     status: { $ne: "Completed" },
     dueDate: { $lte: endOfTomorrow }
   }).populate("userId", "email name");
-  tasks.forEach(task => {
-  console.log({
-    title: task.title,
-    email: task.userId?.email
-  });
-});
-
-  console.log(`Checking ${tasks.length} task(s)...`);
 
   for (const task of tasks) {
     try {
@@ -213,20 +236,20 @@ export const sendTaskReminderEmails = async (currentDate = new Date()) => {
       const reminderTracking = task.reminderTracking || {};
       const reminderField = getReminderTrackingField(reminderType);
 
-      if (reminderTracking[reminderField]) {
+      if (reminderType === "overdue") {
+        if (!shouldSendOverdueReminder(task, currentDate)) {
+          continue;
+        }
+      } else if (reminderTracking[reminderField]) {
         continue;
       }
 
       if (!task.userId?.email) {
-        console.log(`Skipping "${task.title}" (no user email).`);
         continue;
       }
 
-      console.log(`Creating reminder for: ${task.title}`);
-
       const message = getReminderMessage(task, reminderType);
 
-      // Create notification
       await createNotification({
         userId: task.userId._id,
         title: REMINDER_TYPES[reminderType].title,
@@ -235,24 +258,14 @@ export const sendTaskReminderEmails = async (currentDate = new Date()) => {
         relatedTask: task._id
       });
 
-      // Send email
       try {
-       try {
-        console.log("Task User Object:");
-console.log(task.userId);
-console.log("Email:", task.userId.email);
-  await sendEmail({
-    to: task.userId.email,
-    subject: `${REMINDER_TYPES[reminderType].title} - Smart Task Manager`,
-    html: buildReminderEmailHtml(task, reminderType)
-  });
-
-  console.log(`✅ Reminder email sent to ${task.userId.email}`);
-} catch (error) {
-  console.error("❌ Email sending failed:", error);
-}
-
-        console.log(`Email sent to ${process.env.EMAIL_USER}`);
+        await sendEmail({
+          to: task.userId.email,
+          subject: reminderType === "overdue"
+            ? "Task Overdue - Smart Task Manager"
+            : `${REMINDER_TYPES[reminderType].title} - Smart Task Manager`,
+          html: buildReminderEmailHtml(task, reminderType)
+        });
       } catch (emailError) {
         console.error("Email sending failed:", emailError.message);
       }
@@ -260,7 +273,13 @@ console.log("Email:", task.userId.email);
       task.reminderTracking = {
         ...reminderTracking,
         [reminderField]: new Date(),
-        lastReminderSentAt: new Date()
+        lastReminderSentAt: new Date(),
+        ...(reminderType === "overdue"
+          ? {
+              lastOverdueReminderAt: new Date(),
+              overdueReminderSentAt: new Date()
+            }
+          : {})
       };
 
       await task.save();

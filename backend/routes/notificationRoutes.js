@@ -3,6 +3,7 @@ import {
   listNotifications,
   readAllNotifications,
   readNotification,
+  removeAllNotifications,
   removeNotification,
   unreadCount
 } from "../controllers/notificationController.js";
@@ -16,6 +17,7 @@ router.get("/", listNotifications);
 router.get("/unread-count", unreadCount);
 router.patch("/read-all", readAllNotifications);
 router.patch("/:id/read", readNotification);
+router.delete("/", removeAllNotifications);
 router.delete("/:id", removeNotification);
 
 export default router;

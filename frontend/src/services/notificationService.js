@@ -24,3 +24,8 @@ export const deleteNotification = async (id) => {
   const { data } = await api.delete(`/notifications/${id}`);
   return data;
 };
+
+export const deleteAllNotifications = async () => {
+  const { data } = await api.delete("/notifications");
+  return data;
+};

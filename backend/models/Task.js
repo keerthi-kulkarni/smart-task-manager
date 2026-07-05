@@ -64,6 +64,10 @@ const taskSchema = new mongoose.Schema(
         type: Date,
         default: null
       },
+      lastOverdueReminderAt: {
+        type: Date,
+        default: null
+      },
       highPriorityDueTomorrowReminderSentAt: {
         type: Date,
         default: null

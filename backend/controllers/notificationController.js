@@ -1,6 +1,7 @@
 import AppError from "../utils/AppError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
+  deleteAllNotifications,
   deleteNotification,
   getNotifications,
   getUnreadCount,
@@ -36,6 +37,12 @@ export const removeNotification = asyncHandler(async (req, res) => {
   await deleteNotification(req.params.id, req.user._id);
 
   res.status(200).json({ message: "Notification deleted successfully." });
+});
+
+export const removeAllNotifications = asyncHandler(async (req, res) => {
+  await deleteAllNotifications(req.user._id);
+
+  res.status(200).json({ message: "All notifications deleted successfully." });
 });
 
 export const unreadCount = asyncHandler(async (req, res) => {
