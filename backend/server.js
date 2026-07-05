@@ -53,6 +53,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Smart Task Manager API is running 🚀"
+  });
+});
 
 app.use(notFound);
 app.use(errorHandler);
