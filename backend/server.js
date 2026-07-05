@@ -8,8 +8,10 @@ import morgan from "morgan";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
+import { startNotificationCron } from "./cron/notificationCron.js";
 
 dotenv.config();
 
@@ -50,12 +52,15 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 connectDB()
   .then(() => {
+    startNotificationCron();
+
     app.listen(port, () => {
       console.log(`API running on port ${port}`);
     });

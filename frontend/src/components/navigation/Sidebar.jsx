@@ -1,10 +1,11 @@
-import { BarChart3, CheckSquare, UserRound } from "lucide-react";
+import { Bell, BarChart3, CheckSquare, UserRound } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
   { to: "/tasks", label: "Tasks", icon: CheckSquare },
+  { to: "/notifications", label: "Notifications", icon: Bell },
   { to: "/profile", label: "Profile", icon: UserRound }
 ];
 

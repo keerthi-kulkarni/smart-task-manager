@@ -46,6 +46,28 @@ const taskSchema = new mongoose.Schema(
     completedAt: {
       type: Date,
       default: null
+    },
+    reminderTracking: {
+      lastReminderSentAt: {
+        type: Date,
+        default: null
+      },
+      dueTodayReminderSentAt: {
+        type: Date,
+        default: null
+      },
+      dueTomorrowReminderSentAt: {
+        type: Date,
+        default: null
+      },
+      overdueReminderSentAt: {
+        type: Date,
+        default: null
+      },
+      highPriorityDueTomorrowReminderSentAt: {
+        type: Date,
+        default: null
+      }
     }
   },
   {

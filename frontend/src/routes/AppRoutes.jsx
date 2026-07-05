@@ -5,6 +5,7 @@ import AuthLayout from "../layouts/AuthLayout.jsx";
 import Dashboard from "../pages/Dashboard.jsx";
 import Login from "../pages/Login.jsx";
 import NotFound from "../pages/NotFound.jsx";
+import Notifications from "../pages/Notifications.jsx";
 import Profile from "../pages/Profile.jsx";
 import Register from "../pages/Register.jsx";
 import Tasks from "../pages/Tasks.jsx";
@@ -24,6 +25,7 @@ const AppRoutes = () => (
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/tasks" element={<Tasks />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
       </Route>
     </Route>

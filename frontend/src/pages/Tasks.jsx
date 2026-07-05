@@ -13,6 +13,10 @@ import { getErrorMessage } from "../services/api.js";
 import * as taskService from "../services/taskService.js";
 import styles from "./Tasks.module.css";
 
+const refreshNotifications = () => {
+  window.dispatchEvent(new CustomEvent("notifications:refresh"));
+};
+
 const initialFilters = {
   search: "",
   status: "",
@@ -98,6 +102,7 @@ const Tasks = () => {
 
       setIsModalOpen(false);
       await loadTasks();
+      refreshNotifications();
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -110,6 +115,7 @@ const Tasks = () => {
       await taskService.updateTask(task._id, { status: "Completed" });
       toast.success("Task completed");
       await loadTasks();
+      refreshNotifications();
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
@@ -124,6 +130,7 @@ const Tasks = () => {
       await taskService.deleteTask(task._id);
       toast.success("Task deleted");
       await loadTasks();
+      refreshNotifications();
     } catch (error) {
       toast.error(getErrorMessage(error));
     }

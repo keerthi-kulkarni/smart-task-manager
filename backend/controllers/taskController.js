@@ -1,6 +1,7 @@
 import Task from "../models/Task.js";
 import { createActivityLog } from "../services/activityService.js";
 import { buildTasksCsv } from "../services/csvService.js";
+import { createTaskNotification } from "../services/notificationService.js";
 import AppError from "../utils/AppError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { buildTaskQuery, getPaginationOptions, getTaskSortOption } from "../utils/taskQuery.js";
@@ -86,6 +87,14 @@ export const createTask = asyncHandler(async (req, res) => {
     }
   });
 
+  await createTaskNotification({
+    userId: req.user._id,
+    title: "Task created",
+    message: `Task "${task.title}" was created.`,
+    type: "success",
+    relatedTask: task._id
+  });
+
   res.status(201).json({
     task,
     suggestedPriority: getSuggestedPriority(task.dueDate),
@@ -125,6 +134,24 @@ export const updateTask = asyncHandler(async (req, res) => {
     }
   });
 
+  await createTaskNotification({
+    userId: req.user._id,
+    title: "Task updated",
+    message: `Task "${task.title}" was updated.`,
+    type: "info",
+    relatedTask: task._id
+  });
+
+  if (task.status === "Completed") {
+    await createTaskNotification({
+      userId: req.user._id,
+      title: "Task completed",
+      message: `Congratulations! You completed "${task.title}".`,
+      type: "success",
+      relatedTask: task._id
+    });
+  }
+
   res.status(200).json({
     task,
     isOverdue: isTaskOverdue(task)
@@ -142,6 +169,14 @@ export const deleteTask = asyncHandler(async (req, res) => {
     entity: "task",
     entityId: task._id,
     message: `Deleted "${task.title}"`
+  });
+
+  await createTaskNotification({
+    userId: req.user._id,
+    title: "Task deleted",
+    message: `Task "${task.title}" was deleted.`,
+    type: "warning",
+    relatedTask: task._id
   });
 
   res.status(200).json({

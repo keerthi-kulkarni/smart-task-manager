@@ -2,6 +2,7 @@ import { LogOut, Moon, Sun } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import NotificationBell from "../notifications/NotificationBell.jsx";
 import Button from "../ui/Button.jsx";
 import styles from "./Topbar.module.css";
 
@@ -21,6 +22,7 @@ const Topbar = () => {
         <h2>{user?.name || "Student"}</h2>
       </div>
       <div className={styles.actions}>
+        <NotificationBell />
         <Button
           type="button"
           variant="ghost"
