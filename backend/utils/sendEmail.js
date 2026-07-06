@@ -11,12 +11,19 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async ({ to, subject, html }) => {
-  await transporter.sendMail({
-    from: `"Smart Task Manager" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
-};
+  try {
+    await transporter.sendMail({
+      from: `"Smart Task Manager" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
 
+    console.log("✅ Email sent successfully");
+  } catch (error) {
+    console.error("SMTP ERROR:");
+    console.error(error);
+    throw error;
+  }
+};
 export default sendEmail;
