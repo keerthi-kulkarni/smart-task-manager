@@ -16,9 +16,11 @@ import { startNotificationCron } from "./cron/notificationCron.js";
 dotenv.config();
 
 const app = express();
+
+app.set("trust proxy", 1);
+
 const port = process.env.PORT || 5000;
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-
 app.use(helmet());
 app.use(
   cors({
