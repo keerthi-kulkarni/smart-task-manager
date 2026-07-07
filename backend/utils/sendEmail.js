@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async ({ to, subject, html }) => {
   try {
     await transporter.sendMail({
-      from: `"Smart Task Manager" <${process.env.EMAIL_USER}>`,
+      from: '"Smart Task Manager" <smarttaskmanager2026@gmail.com>',
       to,
       subject,
       html,
